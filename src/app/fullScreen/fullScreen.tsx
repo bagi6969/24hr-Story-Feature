@@ -5,7 +5,7 @@ import Image from "next/image";
 
 type StoryModalProps = {
   currentIndex: number | null;
-  stories: Story[] | string | string[];
+  stories: Story[];
   setCurrentIndex: (index: number | null) => void;
 };
 function formatTime(timestamp: number) {
