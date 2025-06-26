@@ -3,15 +3,41 @@ import { useState, useEffect, useReducer } from "react";
 import Image from "next/image";
 import { storyReducer } from "@/app/reducer/storyReducer";
 import StoryModal from "../app/fullScreen/fullScreen";
+
+export type Story = {
+  id: string;
+  image: string;
+  createdAt: number;
+};
+
 export default function Home() {
-  const [stories, dispatch] = useReducer(storyReducer, []);
+  const [stories, dispatch] = useReducer(storyReducer, [] as Story[]);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 
-  // load stories from localStorage on
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const filtered = stories.filter(
+        (story) => now - story.createdAt < 24 * 60 * 60 * 1000
+      );
+      dispatch({ type: "SET", payload: filtered });
+    }, 60 * 1000); // check every 1 minute
+
+    return () => clearInterval(interval);
+  }, [stories]);
+
+  // load stories from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("stories");
     if (saved) {
-      dispatch({ type: "SET", payload: JSON.parse(saved) });
+      const allStories: Story[] = JSON.parse(saved);
+      const now = Date.now();
+      const validStories = allStories.filter(
+        (story) => now - story.createdAt < 24 * 60 * 60 * 1000
+      );
+
+      dispatch({ type: "SET", payload: validStories });
+      localStorage.setItem("stories", JSON.stringify(validStories));
     }
   }, []);
 
@@ -27,7 +53,7 @@ export default function Home() {
       if (currentIndex < stories.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
-        setCurrentIndex(null); // Close modal after last story
+        setCurrentIndex(null);
       }
     }, 3000);
 
@@ -42,7 +68,14 @@ export default function Home() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result as string;
-      dispatch({ type: "ADD", payload: base64 });
+
+      const newStory: Story = {
+        id: crypto.randomUUID(),
+        image: base64,
+        createdAt: Date.now(),
+      };
+
+      dispatch({ type: "ADD", payload: newStory });
     };
     reader.readAsDataURL(file);
   };
@@ -77,7 +110,7 @@ export default function Home() {
               <Image
                 width={64}
                 height={64}
-                src={story}
+                src={story.image}
                 alt={`story ${i}`}
                 className="w-full h-full object-cover"
               />

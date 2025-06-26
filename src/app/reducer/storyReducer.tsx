@@ -1,8 +1,10 @@
-export type StoryAction =
-  | { type: "ADD"; payload: string }
-  | { type: "SET"; payload: string[] };
+import { Story } from "@/app/page";
 
-export function storyReducer(state: string[], action: StoryAction): string[] {
+export type StoryAction =
+  | { type: "ADD"; payload: Story }
+  | { type: "SET"; payload: Story[] };
+
+export function storyReducer(state: Story[], action: StoryAction): Story[] {
   switch (action.type) {
     case "SET":
       return action.payload;

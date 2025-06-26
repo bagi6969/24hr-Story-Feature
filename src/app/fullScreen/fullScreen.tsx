@@ -1,11 +1,19 @@
 "use client";
+import { Story } from "@/app/page";
+
 import Image from "next/image";
 
 type StoryModalProps = {
   currentIndex: number | null;
-  stories: string[];
+  stories: Story[] | string | string[];
   setCurrentIndex: (index: number | null) => void;
 };
+function formatTime(timestamp: number) {
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
 
 export default function StoryModal({
   currentIndex,
@@ -13,11 +21,15 @@ export default function StoryModal({
   setCurrentIndex,
 }: StoryModalProps) {
   if (currentIndex === null) return null;
+  const story = stories[currentIndex];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
-      <div className="relative w-[90%] md:w-[400px] h-[60vh] bg-white rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
+      <div className=" flex flex-col relative w-[90%] md:w-[400px] h-[60vh] bg-white rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
         {/* progress bar */}
+        <div className="p-2 text-center text-xs text-black mt-px">
+          {formatTime(story.createdAt)}
+        </div>
         <div className="absolute top-0 left-0 w-full h-1 bg-gray-300 z-10">
           <div
             key={currentIndex}
@@ -59,7 +71,7 @@ export default function StoryModal({
 
         {/* story image */}
         <Image
-          src={stories[currentIndex]}
+          src={stories[currentIndex].image}
           width={400}
           height={600}
           alt={`story ${currentIndex}`}
